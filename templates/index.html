@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>A Basic Registration Form</title>
+    <style>
+        body{
+            background:#f2f2f2;
+            font-family:Arial;
+            text-align:center;
+        }
+        form{
+            background:white;
+            width:300px;
+            margin:auto;
+            padding:20px;
+            border-radius:10px;
+        }
+        input,button{
+            width:90%;
+            padding:10px;
+            margin:10px;
+        }
+        button{
+            background:#4CAF50;
+            color:white;
+            border:none;
+            cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h2>A Basic Registration Form</h2>
+
+<form action="/register" method="post">
+    <input type="text" name="name" placeholder="Enter Name" required>
+    <input type="email" name="email" placeholder="Enter Email" required>
+    <input type="text" name="phone" placeholder="Enter Phone" required>
+    <button type="submit">Submit</button>
+</form>
+
+</body>
+</html>

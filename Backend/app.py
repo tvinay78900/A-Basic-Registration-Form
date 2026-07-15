@@ -4,76 +4,104 @@ import mysql.connector
 import os
 
 app = Flask(__name__)
-CORS(app)
+
+# Enable CORS
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    supports_credentials=True
+)
 
 # ===============================
 # TiDB Cloud Database Connection
 # ===============================
 
-db = mysql.connector.connect(
-    host="gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
-    user="VhVBHqfkiAdJRDU.root",
-    password="trcsQfVz4Vkmb7hV",
-    database="registration_db",
-    port=4000
-)
+try:
+    db = mysql.connector.connect(
+        host="gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
+        user="VhVBHqfkiAdJRDU.root",
+        password="trcsQfVz4Vkmb7hV",   
+        database="registration_db",
+        port=4000,
+        ssl_disabled=False
+    )
 
-cursor = db.cursor()
+    cursor = db.cursor()
+    print("Database Connected Successfully")
 
+except Exception as e:
+    print("Database Connection Error:", e)
 
 # ===============================
 # Register API
 # ===============================
 
-@app.route("/register", methods=["POST"])
+@app.route("/register", methods=["POST", "OPTIONS"])
 def register():
 
-    data = request.get_json()
+    if request.method == "OPTIONS":
+        return "", 200
 
-    name = data.get("name")
-    email = data.get("email")
-    phone = data.get("phone")
+    try:
 
-    # Check duplicate email
-    cursor.execute(
-        "SELECT * FROM users WHERE email=%s",
-        (email,)
-    )
+        data = request.get_json()
 
-    if cursor.fetchone():
+        name = data.get("name")
+        email = data.get("email")
+        phone = data.get("phone")
+
+        # Duplicate Email Check
+        cursor.execute(
+            "SELECT * FROM users WHERE email=%s",
+            (email,)
+        )
+
+        if cursor.fetchone():
+            return jsonify({
+                "success": False,
+                "message": "Email already exists."
+            })
+
+        # Duplicate Phone Check
+        cursor.execute(
+            "SELECT * FROM users WHERE phone=%s",
+            (phone,)
+        )
+
+        if cursor.fetchone():
+            return jsonify({
+                "success": False,
+                "message": "Phone number already exists."
+            })
+
+        # Insert Data
+        cursor.execute(
+            "INSERT INTO users(name,email,phone) VALUES(%s,%s,%s)",
+            (name, email, phone)
+        )
+
+        db.commit()
+
         return jsonify({
-            "success": False,
-            "message": "Email already exists."
+            "success": True,
+            "message": "Registration Successful"
         })
 
-    # Check duplicate phone
-    cursor.execute(
-        "SELECT * FROM users WHERE phone=%s",
-        (phone,)
-    )
+    except Exception as e:
 
-    if cursor.fetchone():
         return jsonify({
             "success": False,
-            "message": "Phone number already exists."
-        })
+            "message": str(e)
+        }), 500
 
-    # Insert Data
-    sql = """
-    INSERT INTO users(name,email,phone)
-    VALUES(%s,%s,%s)
-    """
 
-    values = (name, email, phone)
+# ===============================
+# Home Route
+# ===============================
 
-    cursor.execute(sql, values)
-
-    db.commit()
-
-    return jsonify({
-        "success": True,
-        "message": "Registration Successful"
-    })
+@app.route("/")
+def home():
+    return "Backend Running Successfully 🚀"
 
 
 # ===============================

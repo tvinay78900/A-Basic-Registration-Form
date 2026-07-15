@@ -23,7 +23,7 @@ try:
         password="trcsQfVz4Vkmb7hV",   
         database="registration_db",
         port=4000,
-        ssl_disabled=False
+        ssl_disabled=True
     )
 
     cursor = db.cursor()

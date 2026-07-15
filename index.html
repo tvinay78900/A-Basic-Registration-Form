@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Registration Form</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h2>A Basic Registration Form</h2>
+
+    <form id="registerForm">
+
+        <input
+            type="text"
+            id="name"
+            placeholder="Full Name"
+            required
+        >
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Email Address"
+            required
+        >
+
+        <input
+            type="text"
+            id="phone"
+            placeholder="Phone Number"
+            maxlength="10"
+            required
+        >
+
+        <button type="submit">
+            Submit
+        </button>
+
+    </form>
+
+</div>
+
+<!-- Confirmation Popup -->
+
+<div class="popup" id="confirmPopup">
+
+    <div class="popup-box">
+
+        <h3>Confirm Registration</h3>
+
+        <p>
+            Do you want to submit this registration?
+        </p>
+
+        <div class="popup-buttons">
+
+            <button class="cancel" onclick="closeConfirm()">
+                Cancel
+            </button>
+
+            <button onclick="confirmRegister()">
+                Confirm
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Loading Popup -->
+
+<div class="popup" id="loadingPopup">
+
+    <div class="popup-box">
+
+        <h3>Processing...</h3>
+
+        <div class="loader"></div>
+
+        <p>Please wait...</p>
+
+    </div>
+
+</div>
+
+<!-- Success Popup -->
+
+<div class="popup" id="successPopup">
+
+    <div class="popup-box">
+
+        <h3>Success</h3>
+
+        <p>Registration Submitted Successfully.</p>
+
+        <button onclick="closeSuccess()">
+            OK
+        </button>
+
+    </div>
+
+</div>
+
+<!-- Error Popup -->
+
+<div class="popup" id="errorPopup">
+
+    <div class="popup-box">
+
+        <h3>Error</h3>
+
+        <p id="errorMessage"></p>
+
+        <button onclick="closeError()">
+            OK
+        </button>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

@@ -42,7 +42,7 @@ function confirmRegister(){
 
     setTimeout(()=>{
 
-        fetch("https://a-basic-registration-form.onrender.com",{
+        fetch("https://a-basic-registration-form.onrender.com/register",{
 
             method:"POST",
 

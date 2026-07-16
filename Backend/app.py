@@ -4,80 +4,63 @@ import mysql.connector
 import os
 
 app = Flask(__name__)
+CORS(app)
 
-# Enable CORS
-CORS(
-    app,
-    resources={r"/*": {"origins": "*"}},
-    supports_credentials=True
-)
-
-# ===============================
-# TiDB Cloud Database Connection
-# ===============================
-
-try:
-    db = mysql.connector.connect(
+def get_db():
+    return mysql.connector.connect(
         host="gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
         user="VhVBHqfkiAdJRDU.root",
-        password="trcsQfVz4Vkmb7hV",   
+        password="trcsQfVz4Vkmb7hV",
         database="registration_db",
         port=4000,
-        ssl_disabled=False
+        ssl_verify_cert=False,
+        connection_timeout=30
     )
 
-    cursor = db.cursor()
-    print("Database Connected Successfully")
+@app.route("/")
+def home():
+    return "Backend Running Successfully 🚀"
 
-except Exception as e:
-    print("Database Connection Error:", e)
-
-# ===============================
-# Register API
-# ===============================
-
-@app.route("/register", methods=["POST", "OPTIONS"])
+@app.route("/register", methods=["POST"])
 def register():
-
-    if request.method == "OPTIONS":
-        return "", 200
+    db = None
+    cursor = None
 
     try:
-
         data = request.get_json()
 
-        name = data.get("name")
-        email = data.get("email")
-        phone = data.get("phone")
+        db = get_db()
+        cursor = db.cursor()
 
-        # Duplicate Email Check
+        name = data["name"]
+        email = data["email"]
+        phone = data["phone"]
+
         cursor.execute(
-            "SELECT * FROM users WHERE email=%s",
+            "SELECT id FROM users WHERE email=%s",
             (email,)
         )
 
         if cursor.fetchone():
             return jsonify({
                 "success": False,
-                "message": "Email already exists."
+                "message": "Email already exists"
             })
 
-        # Duplicate Phone Check
         cursor.execute(
-            "SELECT * FROM users WHERE phone=%s",
+            "SELECT id FROM users WHERE phone=%s",
             (phone,)
         )
 
         if cursor.fetchone():
             return jsonify({
                 "success": False,
-                "message": "Phone number already exists."
+                "message": "Phone already exists"
             })
 
-        # Insert Data
         cursor.execute(
             "INSERT INTO users(name,email,phone) VALUES(%s,%s,%s)",
-            (name, email, phone)
+            (name,email,phone)
         )
 
         db.commit()
@@ -88,26 +71,17 @@ def register():
         })
 
     except Exception as e:
-
         return jsonify({
             "success": False,
             "message": str(e)
-        }), 500
+        }),500
 
-
-# ===============================
-# Home Route
-# ===============================
-
-@app.route("/")
-def home():
-    return "Backend Running Successfully 🚀"
-
-
-# ===============================
-# Run Server
-# ===============================
+    finally:
+        if cursor:
+            cursor.close()
+        if db and db.is_connected():
+            db.close()
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    port=int(os.environ.get("PORT",5000))
+    app.run(host="0.0.0.0",port=port)

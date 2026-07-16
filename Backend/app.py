@@ -12,25 +12,22 @@ CORS(
     supports_credentials=True
 )
 
+
 # ===============================
-# TiDB Cloud Database Connection
+# Database Connection Function
 # ===============================
 
-try:
-    db = mysql.connector.connect(
+def get_db_connection():
+    return mysql.connector.connect(
         host="gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
         user="VhVBHqfkiAdJRDU.root",
-        password="trcsQfVz4Vkmb7hV",   
+        password="trcsQfVz4Vkmb7hV",   # Apna password yaha dal
         database="registration_db",
         port=4000,
-        ssl_disabled=False
+        ssl_disabled=False,
+        autocommit=True
     )
 
-    cursor = db.cursor()
-    print("Database Connected Successfully")
-
-except Exception as e:
-    print("Database Connection Error:", e)
 
 # ===============================
 # Register API
@@ -42,6 +39,9 @@ def register():
     if request.method == "OPTIONS":
         return "", 200
 
+    db = None
+    cursor = None
+
     try:
 
         data = request.get_json()
@@ -49,6 +49,9 @@ def register():
         name = data.get("name")
         email = data.get("email")
         phone = data.get("phone")
+
+        db = get_db_connection()
+        cursor = db.cursor()
 
         # Duplicate Email Check
         cursor.execute(
@@ -80,8 +83,6 @@ def register():
             (name, email, phone)
         )
 
-        db.commit()
-
         return jsonify({
             "success": True,
             "message": "Registration Successful"
@@ -93,6 +94,14 @@ def register():
             "success": False,
             "message": str(e)
         }), 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if db:
+            db.close()
 
 
 # ===============================
